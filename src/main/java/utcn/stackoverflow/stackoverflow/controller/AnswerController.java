@@ -3,6 +3,7 @@ package utcn.stackoverflow.stackoverflow.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import utcn.stackoverflow.stackoverflow.dto.AddAnswerRequest;
 import utcn.stackoverflow.stackoverflow.entity.Answer;
 import utcn.stackoverflow.stackoverflow.service.AnswerService;
 
@@ -35,14 +36,14 @@ public class AnswerController {
 
     @PostMapping("/addAnswer")
     @ResponseBody
-    public Answer addAnswer(@RequestBody Answer answer) {
-        return answerService.saveAnswer(answer);
+    public Answer addAnswer(@RequestBody AddAnswerRequest answer) {
+        return answerService.saveAnswer(answer.getQuestionId(), answer.getUserId(), answer.getDescription());
     }
 
     @PostMapping("/updateAnswer")
     @ResponseBody
-    public Answer updateAnswer(@RequestBody Answer answer) {
-        return answerService.saveAnswer(answer);
+    public Answer updateAnswer(@RequestBody AddAnswerRequest answer) {
+        return answerService.saveAnswer(answer.getQuestionId(), answer.getUserId(), answer.getDescription());
     }
 
 }

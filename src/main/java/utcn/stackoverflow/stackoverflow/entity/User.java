@@ -1,8 +1,11 @@
 package utcn.stackoverflow.stackoverflow.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -30,8 +33,16 @@ public class User {
     @Column(name = "role")
     private String role;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Content> contentList;
+
     public User() {
 
+    }
+
+    @JsonManagedReference
+    public List<Content> getContentList(){
+        return contentList;
     }
 
     public User(Long userId, String lastName, String firstName, String email, String password, String role) {
@@ -42,4 +53,10 @@ public class User {
         this.password = password;
         this.role = role;
     }
+
+    public void addContent(Content content){
+        this.contentList.add(content);
+        content.setUser(this);
+    }
+
 }

@@ -1,6 +1,7 @@
 package utcn.stackoverflow.stackoverflow.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import utcn.stackoverflow.stackoverflow.dto.UserDTO;
 import utcn.stackoverflow.stackoverflow.entity.User;
@@ -50,6 +51,8 @@ public class UserService {
     }
 
     public User saveUser(User user) {
+        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+
         return userRepository.save(user);
     }
 }

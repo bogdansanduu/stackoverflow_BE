@@ -3,6 +3,7 @@ package utcn.stackoverflow.stackoverflow.controller;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import utcn.stackoverflow.stackoverflow.dto.AddQuestionRequest;
 import utcn.stackoverflow.stackoverflow.entity.Question;
 import utcn.stackoverflow.stackoverflow.service.QuestionService;
 
@@ -37,14 +38,14 @@ public class QuestionController {
 
     @PostMapping("/addQuestion")
     @ResponseBody
-    public Question addQuestion(@RequestBody Question question) {
-        return questionService.saveQuestion(question);
+    public Question addQuestion(@RequestBody AddQuestionRequest question) {
+        return questionService.saveQuestion(question.getUserId(), question.getTitle(), question.getDescription());
     }
 
     @PostMapping("/updateQuestion")
     @ResponseBody
-    public Question updateQuestion(@RequestBody Question question) {
-        return questionService.saveQuestion(question);
+    public Question updateQuestion(@RequestBody AddQuestionRequest question) {
+        return questionService.saveQuestion(question.getUserId(), question.getTitle(), question.getDescription());
     }
 
 }

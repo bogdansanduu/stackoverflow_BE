@@ -1,5 +1,7 @@
 package utcn.stackoverflow.stackoverflow.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,8 +21,9 @@ public class Content {
     @Column(name = "content_id")
     private Long contentId;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Column(name = "description")
     private String description;
@@ -31,5 +34,10 @@ public class Content {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @JsonBackReference
+    public User getUser(){
+        return user;
+    }
 
 }
