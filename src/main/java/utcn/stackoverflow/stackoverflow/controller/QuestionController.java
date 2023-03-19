@@ -1,5 +1,6 @@
 package utcn.stackoverflow.stackoverflow.controller;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import utcn.stackoverflow.stackoverflow.entity.Question;
@@ -29,6 +30,7 @@ public class QuestionController {
 
     @DeleteMapping("/deleteById/{id}")
     @ResponseBody
+    @Transactional
     public long deleteQuestionById(@PathVariable Long id) {
         return questionService.deleteQuestionById(id);
     }
