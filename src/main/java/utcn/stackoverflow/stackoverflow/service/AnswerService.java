@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import utcn.stackoverflow.stackoverflow.entity.Answer;
 import utcn.stackoverflow.stackoverflow.entity.Content;
+import utcn.stackoverflow.stackoverflow.entity.Question;
 import utcn.stackoverflow.stackoverflow.entity.User;
 import utcn.stackoverflow.stackoverflow.repository.AnswerRepository;
 import utcn.stackoverflow.stackoverflow.repository.ContentRepository;
+import utcn.stackoverflow.stackoverflow.repository.QuestionRepository;
 import utcn.stackoverflow.stackoverflow.repository.UserRepository;
 
 import java.util.List;
@@ -21,6 +23,8 @@ public class AnswerService {
     AnswerRepository answerRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    QuestionRepository questionRepository;
 
     public List<Answer> retrieveAnswers() {
         return (List<Answer>) answerRepository.findAll();
@@ -44,6 +48,10 @@ public class AnswerService {
         if (user.isEmpty()) {
             return null;
         } else {
+            Optional<Question> question = questionRepository.findById(questionId);
+            if (question.isEmpty()) {
+                return null; // fail if the question is not found in the database
+            }
             User foundUser = user.get();
 
             toSaveContent.setUser(foundUser);
