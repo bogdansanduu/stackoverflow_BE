@@ -55,4 +55,17 @@ public class UserService {
 
         return userRepository.save(user);
     }
+
+    public User updateUser(User user) {
+        Optional<User> foundUser = userRepository.findByUserId(user.getUserId());
+
+        if (foundUser.isPresent()) {
+            User myUpdatedUser = foundUser.get();
+
+            myUpdatedUser.setFirstName(user.getFirstName());
+            myUpdatedUser.setFirstName(user.getLastName());
+            return userRepository.save(myUpdatedUser);
+        }
+        return null;
+    }
 }
