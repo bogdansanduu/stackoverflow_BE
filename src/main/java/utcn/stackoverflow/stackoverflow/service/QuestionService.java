@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import utcn.stackoverflow.stackoverflow.entity.Content;
 import utcn.stackoverflow.stackoverflow.entity.Question;
-import utcn.stackoverflow.stackoverflow.entity.Tag;
 import utcn.stackoverflow.stackoverflow.entity.User;
 import utcn.stackoverflow.stackoverflow.repository.ContentRepository;
 import utcn.stackoverflow.stackoverflow.repository.QuestionRepository;
@@ -14,7 +13,6 @@ import utcn.stackoverflow.stackoverflow.repository.UserRepository;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class QuestionService {
@@ -45,8 +43,6 @@ public class QuestionService {
     }
 
     public Question saveQuestion(Long userId, String title, String description) {
-        Content toSaveContent = new Content();
-
         Optional<User> user = userRepository.findByUserId(userId);
 
         if (user.isEmpty()) {
@@ -54,17 +50,19 @@ public class QuestionService {
         } else {
             User foundUser = user.get();
 
+            Content toSaveContent = new Content();
             toSaveContent.setUser(foundUser);
             toSaveContent.setDescription(description);
 
             foundUser.addContent(toSaveContent);
             userRepository.save(foundUser);
-            contentRepository.save(toSaveContent);
 
             Question questionToSave = new Question();
             questionToSave.setTitle(title);
             questionToSave.setContent(toSaveContent);
             questionToSave.setTags(new HashSet<>()); // empty set of tags
+
+            contentRepository.save(toSaveContent); // save the content entity before the question entity
 
             return questionRepository.save(questionToSave);
         }

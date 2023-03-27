@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 
@@ -33,7 +35,7 @@ public class User {
     @Column(name = "role")
     private String role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Content> contentList;
 
     public User() {
@@ -57,6 +59,11 @@ public class User {
     public void addContent(Content content){
         this.contentList.add(content);
         content.setUser(this);
+    }
+
+    public void removeContent(Content content){
+        this.contentList.remove(content);
+        content.setUser(null);
     }
 
 }

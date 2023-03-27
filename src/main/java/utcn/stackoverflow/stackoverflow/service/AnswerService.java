@@ -62,7 +62,7 @@ public class AnswerService {
             contentRepository.save(toSaveContent);
 
             Answer answerToSave = new Answer();
-            answerToSave.setQuestionId(questionId);
+            answerToSave.setQuestion(question.get());
             answerToSave.setContent(toSaveContent);
 
             return answerRepository.save(answerToSave);
