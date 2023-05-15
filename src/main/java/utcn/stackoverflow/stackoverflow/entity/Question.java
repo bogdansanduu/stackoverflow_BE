@@ -4,14 +4,19 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "questions")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Question {
 
     @Id
@@ -22,11 +27,13 @@ public class Question {
     @Column(name = "title")
     private String title;
 
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "content_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Content content;
 
+    @OneToMany(mappedBy = "question")
+    private List<Answer> answers = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = {
@@ -53,5 +60,4 @@ public class Question {
             tag.getQuestions().remove(this);
         }
     }
-
 }

@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import utcn.stackoverflow.stackoverflow.dto.AuthenticationRequest;
 import utcn.stackoverflow.stackoverflow.dto.LoginResponseDto;
+import utcn.stackoverflow.stackoverflow.dto.UserDTO;
 import utcn.stackoverflow.stackoverflow.security.config.JwtUtils;
+import utcn.stackoverflow.stackoverflow.service.UserService;
 
 @RestController
 @RequestMapping("/auth")
@@ -22,6 +24,8 @@ public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final JwtUtils jwtUtils;
+
+    private final UserService userService;
 
     @PostMapping("/signIn")
     public ResponseEntity<LoginResponseDto> authenticate(
@@ -37,11 +41,13 @@ public class AuthenticationController {
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
         if (userDetails != null) {
-            LoginResponseDto loginResponseDto = new LoginResponseDto(jwtUtils.generateToken(userDetails));
+            UserDTO userDTO = userService.findUserByEmail(request.getEmail());
+
+            LoginResponseDto loginResponseDto = new LoginResponseDto(jwtUtils.generateToken(userDetails), userDTO);
 
             return ResponseEntity.ok().body(loginResponseDto);
         }
 
-        return ResponseEntity.status(400).body(new LoginResponseDto("ERROR"));
+        return ResponseEntity.status(400).body(new LoginResponseDto("ERROR", null));
     }
 }

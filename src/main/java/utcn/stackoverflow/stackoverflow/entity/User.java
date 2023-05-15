@@ -4,9 +4,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -26,7 +25,7 @@ public class User {
     @Column(name = "f_name")
     private String firstName;
 
-    @Column(name = "e_mail")
+    @Column(name = "e_mail", unique = true)
     private String email;
 
     @Column(name = "password")
@@ -35,8 +34,14 @@ public class User {
     @Column(name = "role")
     private String role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Content> contentList;
+
+    @OneToMany(mappedBy = "user",
+    cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Vote> userContentList = new ArrayList<>();
 
     public User() {
 
@@ -64,6 +69,22 @@ public class User {
     public void removeContent(Content content){
         this.contentList.remove(content);
         content.setUser(null);
+    }
+
+    public void addVoteQuestion(Content content, int value) {
+        Vote userContent = new Vote(this, content);
+        userContent.setType("Question");
+        userContent.setValue(value);
+        userContentList.add(userContent);
+        content.getUserContentList().add(userContent);
+    }
+
+    public void addVoteAnswer(Content content, int value) {
+        Vote userContent = new Vote(this,content);
+        userContent.setType("Answer");
+        userContent.setValue(value);
+        userContentList.add(userContent);
+        content.getUserContentList().add(userContent);
     }
 
 }

@@ -4,6 +4,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import utcn.stackoverflow.stackoverflow.dto.AddQuestionRequest;
+import utcn.stackoverflow.stackoverflow.dto.QuestionDTO;
+import utcn.stackoverflow.stackoverflow.dto.UpdateQuestionRequest;
+import utcn.stackoverflow.stackoverflow.dto.VoteQuestionRequest;
 import utcn.stackoverflow.stackoverflow.entity.Question;
 import utcn.stackoverflow.stackoverflow.service.QuestionService;
 
@@ -18,7 +21,7 @@ public class QuestionController {
 
     @GetMapping("/getAll")
     @ResponseBody
-    public List<Question> retrieveQuestions() {
+    public List<QuestionDTO> retrieveQuestions() {
         return questionService.retrieveQuestions();
     }
 
@@ -38,14 +41,20 @@ public class QuestionController {
 
     @PostMapping("/addQuestion")
     @ResponseBody
-    public Question addQuestion(@RequestBody AddQuestionRequest question) {
-        return questionService.saveQuestion(question.getUserId(), question.getTitle(), question.getDescription());
+    public QuestionDTO addQuestion(@RequestBody AddQuestionRequest question) {
+        return questionService.saveQuestion(question.getUserId(), question.getTitle(), question.getDescription(), question.getPicture());
     }
 
     @PostMapping("/updateQuestion")
     @ResponseBody
-    public Question updateQuestion(@RequestBody AddQuestionRequest question) {
-        return questionService.saveQuestion(question.getUserId(), question.getTitle(), question.getDescription());
+    public QuestionDTO updateQuestion(@RequestBody UpdateQuestionRequest question) {
+        return questionService.updateQuestion(question.getQuestionId(), question.getTitle(), question.getDescription(),question.getPicture());
+    }
+
+    @PatchMapping("/voteQuestion")
+    @ResponseBody
+    public Question voteQuestion(@RequestBody VoteQuestionRequest voteRequest) {
+        return questionService.voteQuestion(voteRequest.getUserId(), voteRequest.getQuestionId(), voteRequest.getValue());
     }
 
 }

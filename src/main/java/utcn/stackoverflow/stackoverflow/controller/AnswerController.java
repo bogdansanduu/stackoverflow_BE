@@ -1,9 +1,13 @@
 package utcn.stackoverflow.stackoverflow.controller;
 
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import utcn.stackoverflow.stackoverflow.dto.AddAnswerRequest;
+import utcn.stackoverflow.stackoverflow.dto.AnswerDTO;
+import utcn.stackoverflow.stackoverflow.dto.UpdateAnswerRequest;
+import utcn.stackoverflow.stackoverflow.dto.VoteAnswerRequest;
 import utcn.stackoverflow.stackoverflow.entity.Answer;
 import utcn.stackoverflow.stackoverflow.service.AnswerService;
 
@@ -30,20 +34,32 @@ public class AnswerController {
 
     @DeleteMapping("/deleteById/{id}")
     @ResponseBody
+    @Transactional
     public long deleteAnswerById(@PathVariable Long id) {
         return answerService.deleteAnswerById(id);
     }
 
     @PostMapping("/addAnswer")
     @ResponseBody
-    public Answer addAnswer(@RequestBody AddAnswerRequest answer) {
-        return answerService.saveAnswer(answer.getQuestionId(), answer.getUserId(), answer.getDescription());
+    public AnswerDTO addAnswer(@RequestBody AddAnswerRequest answer) {
+        return answerService.saveAnswer(answer.getQuestionId(), answer.getUserId(), answer.getDescription(), answer.getPicture());
     }
 
     @PostMapping("/updateAnswer")
     @ResponseBody
-    public Answer updateAnswer(@RequestBody AddAnswerRequest answer) {
-        return answerService.saveAnswer(answer.getQuestionId(), answer.getUserId(), answer.getDescription());
+    public AnswerDTO updateAnswer(@RequestBody UpdateAnswerRequest answer) {
+        return answerService.updateAnswer(answer.getAnswerId(), answer.getDescription(), answer.getPicture());
     }
 
+    @GetMapping("/getAllByQuestionId/{questionId}")
+    @ResponseBody
+    public List<AnswerDTO> retrieveAnswersByQuestionId(@PathVariable Long questionId){
+        return answerService.retrieveAnswersByQuestionId(questionId);
+    }
+
+    @PatchMapping("/voteAnswer")
+    @ResponseBody
+    public Answer voteAnswer(@RequestBody VoteAnswerRequest voteRequest){
+        return answerService.voteAnswer(voteRequest.getUserId(), voteRequest.getAnswerId(), voteRequest.getValue());
+    }
 }

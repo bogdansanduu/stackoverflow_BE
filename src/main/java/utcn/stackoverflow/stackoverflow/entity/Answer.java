@@ -1,5 +1,6 @@
 package utcn.stackoverflow.stackoverflow.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Getter
 @Setter
 @Table(name = "answers")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Answer {
 
     @Id
@@ -18,9 +20,10 @@ public class Answer {
     @Column(name="answer_id")
     private Long answerId;
 
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id")
+    @JsonIgnore
     private Question question;
 
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

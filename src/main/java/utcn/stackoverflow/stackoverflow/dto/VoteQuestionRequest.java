@@ -1,17 +1,17 @@
 package utcn.stackoverflow.stackoverflow.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import utcn.stackoverflow.stackoverflow.entity.Tag;
 
 @Getter
 @AllArgsConstructor
 @EqualsAndHashCode
 @ToString
-public class TagRequest {
-    private final Tag tag;
+public class VoteQuestionRequest {
+    private final Long userId;
     private final Long questionId;
-
+    private final int value;
 }

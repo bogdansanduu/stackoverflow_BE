@@ -14,5 +14,5 @@ public class AddAnswerRequest {
     private final Long questionId;
     private final Long userId;
     private final String description;
-
+    private final String picture;
 }
