@@ -12,7 +12,6 @@ public class VotesService {
     @Autowired
     VotesRepository votesRepository;
 
-
     public VoteDto getVote(Long userId, Long contentId) {
         Vote userContent = votesRepository.findById_UserIdAndId_ContentId(userId, contentId);
 

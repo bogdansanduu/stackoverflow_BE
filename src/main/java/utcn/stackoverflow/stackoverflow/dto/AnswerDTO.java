@@ -1,13 +1,10 @@
 package utcn.stackoverflow.stackoverflow.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import utcn.stackoverflow.stackoverflow.entity.Content;
 import utcn.stackoverflow.stackoverflow.entity.Question;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter

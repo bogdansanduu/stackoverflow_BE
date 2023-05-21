@@ -11,4 +11,7 @@ public class UserDTO {
     private Long id;
     private String firstName;
     private String lastName;
+    private Double score;
+    private String role;
+    private boolean banned;
 }

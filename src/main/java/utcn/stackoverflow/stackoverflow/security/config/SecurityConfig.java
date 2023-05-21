@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -28,7 +29,6 @@ import utcn.stackoverflow.stackoverflow.repository.UserRepository;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
 
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -45,10 +45,14 @@ public class SecurityConfig {
                 .and()
                 .csrf().disable()
                 .authorizeHttpRequests()
-//                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/**").permitAll()
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/answers/**", "/questions/**", "/tags/**", "/users/**", "/votes/**").hasAnyAuthority("user", "admin")
+                .requestMatchers("/admin/**").hasAuthority("admin")
                 .anyRequest()
                 .authenticated()
+                .and()
+                .exceptionHandling()
+                .accessDeniedHandler(accessDeniedHandler())
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -77,26 +81,36 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return new CustomAccessDeniedHandler();
+    }
+
 
     @Bean
     public UserDetailsService userDetailsService() {
         return new UserDetailsService() {
             @Override
             public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-                Optional<User> user = userRepository.findByEmail(email);
-                if (user.isPresent()) {
-                    return new org.springframework.security.core.userdetails.User(
-                            user.get().getEmail(),
-                            user.get().getPassword(),
-                            true,
-                            true,
-                            true,
-                            true,
-                            getAuthorities(user.get().getRole())
-                    );
-                } else {
+                User user = userRepository.findByEmail(email);
+
+                if (user == null) {
                     throw new UsernameNotFoundException("No user was found");
                 }
+
+                if (user.isBanned()) {
+                    throw new UsernameNotFoundException("User is banned");
+                }
+
+                return new org.springframework.security.core.userdetails.User(
+                        user.getEmail(),
+                        user.getPassword(),
+                        !user.isBanned(),
+                        true,
+                        true,
+                        true,
+                        getAuthorities(user.getRole())
+                );
             }
 
             private Collection<? extends GrantedAuthority> getAuthorities(String role) {
@@ -104,6 +118,7 @@ public class SecurityConfig {
             }
         };
     }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

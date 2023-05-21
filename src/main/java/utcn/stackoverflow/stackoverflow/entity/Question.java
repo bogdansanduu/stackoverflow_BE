@@ -8,7 +8,6 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -18,22 +17,6 @@ import java.util.Set;
 @Table(name = "questions")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Question {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "question_id")
-    private Long questionId;
-
-    @Column(name = "title")
-    private String title;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "content_id")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Content content;
-
-    @OneToMany(mappedBy = "question")
-    private List<Answer> answers = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = {
@@ -46,6 +29,18 @@ public class Question {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     Set<Tag> tags;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "question_id")
+    private Long questionId;
+    @Column(name = "title")
+    private String title;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "content_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Content content;
+    @OneToMany(mappedBy = "question")
+    private List<Answer> answers = new ArrayList<>();
 
     public void addTag(Tag tag) {
         this.tags.add(tag);

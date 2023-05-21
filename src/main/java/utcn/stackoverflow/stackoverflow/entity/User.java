@@ -16,7 +16,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="user_id")
+    @Column(name = "user_id")
     private Long userId;
 
     @Column(name = "l_name")
@@ -38,18 +38,22 @@ public class User {
     private List<Content> contentList;
 
     @OneToMany(mappedBy = "user",
-    cascade = CascadeType.ALL,
+            cascade = CascadeType.ALL,
             orphanRemoval = true
     )
     private List<Vote> userContentList = new ArrayList<>();
 
+    @Column(name = "score")
+    private Double score = 0.0D;
+
+    @Column(name = "banned")
+    private boolean banned = false;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
     public User() {
 
-    }
-
-    @JsonManagedReference
-    public List<Content> getContentList(){
-        return contentList;
     }
 
     public User(Long userId, String lastName, String firstName, String email, String password, String role) {
@@ -61,12 +65,17 @@ public class User {
         this.role = role;
     }
 
-    public void addContent(Content content){
+    @JsonManagedReference
+    public List<Content> getContentList() {
+        return contentList;
+    }
+
+    public void addContent(Content content) {
         this.contentList.add(content);
         content.setUser(this);
     }
 
-    public void removeContent(Content content){
+    public void removeContent(Content content) {
         this.contentList.remove(content);
         content.setUser(null);
     }
@@ -80,7 +89,7 @@ public class User {
     }
 
     public void addVoteAnswer(Content content, int value) {
-        Vote userContent = new Vote(this,content);
+        Vote userContent = new Vote(this, content);
         userContent.setType("Answer");
         userContent.setValue(value);
         userContentList.add(userContent);

@@ -16,11 +16,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import utcn.stackoverflow.stackoverflow.entity.User;
 import utcn.stackoverflow.stackoverflow.repository.UserRepository;
 
-import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
@@ -37,29 +35,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String userEmail;
         final String jwtToken;
 
-        if(authHeader == null || !authHeader.startsWith("Bearer")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         jwtToken = authHeader.substring(7);
         userEmail = jwtUtils.extractUsername(jwtToken); //TODO implement it
-        if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            Optional<User> user = userRepository.findByEmail(userEmail);
-            if(user.isPresent()) {
-                UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                        user.get().getEmail(),
-                        user.get().getPassword(),
-                        true,
-                        true,
-                        true,
-                        true,
-                        getAuthorities(user.get().getRole())
-                );
+        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            User user = userRepository.findByEmail(userEmail);
+            if (user != null) {
+                UserDetails userDetails = new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), true, true, true, true, getAuthorities(user.getRole()));
 
-                if(jwtUtils.validateToken(jwtToken, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                if (jwtUtils.validateToken(jwtToken, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }

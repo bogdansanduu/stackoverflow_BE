@@ -53,7 +53,7 @@ public class QuestionController {
 
     @PatchMapping("/voteQuestion")
     @ResponseBody
-    public Question voteQuestion(@RequestBody VoteQuestionRequest voteRequest) {
+    public QuestionDTO voteQuestion(@RequestBody VoteQuestionRequest voteRequest) {
         return questionService.voteQuestion(voteRequest.getUserId(), voteRequest.getQuestionId(), voteRequest.getValue());
     }
 

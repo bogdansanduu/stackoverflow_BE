@@ -4,12 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import utcn.stackoverflow.stackoverflow.dto.AuthenticationRequest;
 import utcn.stackoverflow.stackoverflow.dto.LoginResponseDto;
 import utcn.stackoverflow.stackoverflow.dto.UserDTO;
@@ -49,5 +47,13 @@ public class AuthenticationController {
         }
 
         return ResponseEntity.status(400).body(new LoginResponseDto("ERROR", null));
+    }
+
+    @GetMapping("/some-endpoint")
+    public ResponseEntity<?> someEndpoint(Authentication authentication) {
+        String role = authentication.getAuthorities().iterator().next().getAuthority();
+        System.out.println(role);
+
+        return null;
     }
 }

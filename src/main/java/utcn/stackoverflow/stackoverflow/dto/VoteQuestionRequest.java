@@ -1,6 +1,5 @@
 package utcn.stackoverflow.stackoverflow.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

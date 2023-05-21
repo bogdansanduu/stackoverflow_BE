@@ -3,7 +3,7 @@ create table content (content_id bigint not null auto_increment, created_at date
 create table questions (question_id bigint not null auto_increment, title varchar(255), content_id bigint, primary key (question_id)) engine=InnoDB;
 create table questions_tags (question_id bigint not null, tag_id bigint not null, primary key (question_id, tag_id)) engine=InnoDB;
 create table tags (tag_id bigint not null auto_increment, name varchar(255), primary key (tag_id)) engine=InnoDB;
-create table users (user_id bigint not null auto_increment, e_mail varchar(255), f_name varchar(255), l_name varchar(255), password varchar(255), role varchar(255), primary key (user_id)) engine=InnoDB;
+create table users (user_id bigint not null auto_increment, banned bit, e_mail varchar(255), f_name varchar(255), l_name varchar(255), password varchar(255), phone_number varchar(255), role varchar(255), score float(53), primary key (user_id)) engine=InnoDB;
 create table votes (type varchar(255), value integer, user_user_id bigint not null, content_content_id bigint not null, primary key (content_content_id, user_user_id)) engine=InnoDB;
 alter table users add constraint UK_ehv2osdo3bfokh566calsfx32 unique (e_mail);
 alter table answers add constraint FKqolg9rmukcj8w7j2j6f0os2wr foreign key (content_id) references content (content_id) on delete cascade;

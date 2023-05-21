@@ -10,105 +10,105 @@ import utcn.stackoverflow.stackoverflow.repository.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AnswerService {
 
     @Autowired
-    ContentRepository contentRepository;
+    QuestionRepository questionRepository;
     @Autowired
-    AnswerRepository answerRepository;
+    private ContentRepository contentRepository;
+    @Autowired
+    private AnswerRepository answerRepository;
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    QuestionRepository questionRepository;
-    @Autowired
     private VotesRepository votesRepository;
 
-    public List<Answer> retrieveAnswers() {
-        return (List<Answer>) answerRepository.findAll();
+    public List<AnswerDTO> retrieveAnswers() {
+        List<Answer> answers = answerRepository.findAll();
+        List<AnswerDTO> answerDTOS = new ArrayList<>();
+
+        for (Answer answer : answers) {
+            AnswerDTO answerDTO = mapAnswer(answer);
+            answerDTOS.add(answerDTO);
+        }
+
+        return answerDTOS;
     }
 
-    public Answer getAnswerById(Long id) {
-        Optional<Answer> answer = answerRepository.findById(id);
+    public AnswerDTO getAnswerById(Long id) {
+        Answer answer = answerRepository.findByAnswerId(id);
 
-        return answer.orElse(null);
+        if (answer == null) {
+            return null;
+        }
+
+        return mapAnswer(answer);
     }
 
     public long deleteAnswerById(Long id) {
-        Optional<Answer> answer = answerRepository.findById(id);
+        Answer answer = answerRepository.findByAnswerId(id);
 
-        if (answer.isEmpty()) {
+        if (answer == null) {
             return -1;
         }
 
-        Answer foundAnswer = answer.get();
-
         long returnValue = answerRepository.deleteByAnswerId(id);
 
-        Content answerContent = foundAnswer.getContent();
+        Content answerContent = answer.getContent();
         contentRepository.deleteById(answerContent.getContentId());
 
         return returnValue;
     }
 
     public AnswerDTO saveAnswer(Long questionId, Long userId, String description, String picture) {
-        Optional<User> user = userRepository.findByUserId(userId);
+        User user = userRepository.findByUserId(userId);
+        Question question = questionRepository.findByQuestionId(questionId);
 
-        if (user.isEmpty()) {
+
+        if (user == null || question == null) {
             return null;
         }
 
-        Optional<Question> question = questionRepository.findById(questionId);
-        if (question.isEmpty()) {
-            return null; // fail if the question is not found in the database
-        }
-
-        User foundUser = user.get();
-        Question foundQuestion = question.get();
-
         Content toSaveContent = new Content();
-        toSaveContent.setUser(foundUser);
+        toSaveContent.setUser(user);
         toSaveContent.setDescription(description);
         toSaveContent.setPicture(picture);
 
-        foundUser.addContent(toSaveContent);
-        userRepository.save(foundUser);
+        user.addContent(toSaveContent);
+        userRepository.save(user);
 
         Answer answerToSave = new Answer();
-        answerToSave.setQuestion(foundQuestion);
+        answerToSave.setQuestion(question);
         answerToSave.setContent(toSaveContent);
 
         contentRepository.save(toSaveContent);
         answerRepository.save(answerToSave);
 
-        UserDTO userDTO = new UserDTO(foundUser.getUserId(), foundUser.getFirstName(), foundUser.getLastName());
-        AnswerDTO answerDTO = new AnswerDTO(answerToSave.getAnswerId(), answerToSave.getQuestion(), answerToSave.getContent(), userDTO, (long) 0);
+        UserDTO userDTO = new UserDTO(user.getUserId(), user.getFirstName(), user.getLastName(), user.getScore(), user.getRole(), user.isBanned());
 
-        return answerDTO;
+        return new AnswerDTO(answerToSave.getAnswerId(), answerToSave.getQuestion(), answerToSave.getContent(), userDTO, (long) 0);
     }
 
     public AnswerDTO updateAnswer(Long answerId, String description, String picture) {
-        Optional<Answer> answer = answerRepository.findById(answerId);
+        Answer answer = answerRepository.findByAnswerId(answerId);
 
-        if (answer.isEmpty()) {
+        if (answer == null) {
             return null;
         }
 
-        Answer foundAnswer = answer.get();
-        Content foundAnswerContent = foundAnswer.getContent();
-        User foundAnswerUser = foundAnswerContent.getUser();
+        Content answerContent = answer.getContent();
 
-        foundAnswerContent.setDescription(description);
-        foundAnswerContent.setPicture(picture);
+        answerContent.setDescription(description);
+        answerContent.setPicture(picture);
 
-        contentRepository.save(foundAnswerContent);
-        Answer savedAnswer = answerRepository.save(foundAnswer);
+        contentRepository.save(answerContent);
+        Answer savedAnswer = answerRepository.save(answer);
 
-        UserDTO userDTO = new UserDTO(foundAnswerUser.getUserId(), foundAnswerUser.getFirstName(), foundAnswerUser.getLastName());
-
-        Long voteCount = votesRepository.getVotesValue(foundAnswerContent.getContentId());
+        User answerCreator = answerContent.getUser();
+        UserDTO userDTO = new UserDTO(answerCreator.getUserId(), answerCreator.getFirstName(), answerCreator.getLastName(), answerCreator.getScore(), answerCreator.getRole(), answerCreator.isBanned());
+        Long voteCount = votesRepository.getVotesValue(answerContent.getContentId());
 
         return new AnswerDTO(savedAnswer.getAnswerId(), savedAnswer.getQuestion(), savedAnswer.getContent(), userDTO, voteCount);
     }
@@ -119,17 +119,7 @@ public class AnswerService {
         List<AnswerDTO> answerDTOS = new ArrayList<>();
 
         for (Answer answer : answers) {
-            Long voteCount = votesRepository.getVotesValue(answer.getContent().getContentId());
-
-            if (voteCount == null)
-                voteCount = (long) 0;
-
-
-            User user = answer.getContent().getUser();
-            UserDTO userDTO = new UserDTO(user.getUserId(), user.getFirstName(), user.getLastName());
-
-            AnswerDTO answerDTO = new AnswerDTO(answer.getAnswerId(), answer.getQuestion(), answer.getContent(), userDTO, voteCount);
-
+            AnswerDTO answerDTO = mapAnswer(answer);
             answerDTOS.add(answerDTO);
         }
 
@@ -138,32 +128,91 @@ public class AnswerService {
         return answerDTOS;
     }
 
-    public Answer voteAnswer(Long userId, Long answerId, int value) {
-        Optional<Answer> foundAnswerOptional = answerRepository.findById(answerId);
-        Optional<User> foundUserOptional = userRepository.findById(userId);
+    public AnswerDTO voteAnswer(Long userId, Long answerId, int value) {
+        Answer answer = answerRepository.findByAnswerId(answerId);
+        User voteUser = userRepository.findByUserId(userId);
 
-        if (foundAnswerOptional.isEmpty() || foundUserOptional.isEmpty()) {
+        if (answer == null || voteUser == null) {
             return null;
         }
 
-        Answer foundAnswer = foundAnswerOptional.get();
-        User voteUser = foundUserOptional.get();
+        User answerCreator = answer.getContent().getUser();
 
-        Vote vote = votesRepository.findById_UserIdAndId_ContentId(userId, foundAnswer.getContent().getContentId());
+        Vote vote = votesRepository.findById_UserIdAndId_ContentId(userId, answer.getContent().getContentId());
 
         if (vote == null) {
-            voteUser.addVoteAnswer(foundAnswer.getContent(), value);
-
-            Answer savedAnswer = answerRepository.save(foundAnswer);
-            User answerCreator = savedAnswer.getContent().getUser();
-            UserDTO userDTO = new UserDTO(answerCreator.getUserId(), answerCreator.getFirstName(), answerCreator.getLastName());
-
-            return savedAnswer;
+            voteUser.addVoteAnswer(answer.getContent(), value);
+            updateUserScore(answerCreator, value == 1 ? 5 : -2.5);
+            voteUser.setScore(voteUser.getScore() - 1.5);
         } else {
+            int previousValue = vote.getValue();
             vote.setValue(value);
             votesRepository.save(vote);
 
-            return answerRepository.findByAnswerId(answerId);
+            double scoreChangeCreator = 0.0;
+            double scoreChangeUser = 0.0;
+
+            switch (previousValue) {
+                case -1 -> {
+                    switch (value) {
+                        case 1 -> {
+                            scoreChangeCreator = 7.5;
+                            scoreChangeUser = 1.5;
+                        }
+                        case 0 -> {
+                            scoreChangeCreator = 2.5;
+                            scoreChangeUser = 1.5;
+                        }
+                    }
+                }
+                case 1 -> {
+                    switch (value) {
+                        case -1 -> {
+                            scoreChangeCreator = -7.5;
+                            scoreChangeUser = -1.5;
+                        }
+                        case 0 -> {
+                            scoreChangeCreator = -5.0;
+                            scoreChangeUser = 0.0;
+                        }
+                    }
+                }
+                case 0 -> {
+                    switch (value) {
+                        case 1 -> {
+                            scoreChangeCreator = 5.0;
+                            scoreChangeUser = 0.0;
+                        }
+                        case -1 -> {
+                            scoreChangeCreator = -2.5;
+                            scoreChangeUser = -1.5;
+                        }
+                    }
+                }
+            }
+
+            updateUserScore(answerCreator, scoreChangeCreator);
+            updateUserScore(voteUser, scoreChangeUser);
         }
+
+        return mapAnswer(answer);
+    }
+
+    private AnswerDTO mapAnswer(Answer answer) {
+        Long voteCount = votesRepository.getVotesValue(answer.getContent().getContentId());
+
+        if (voteCount == null) {
+            voteCount = 0L;
+        }
+
+        User user = answer.getContent().getUser();
+        UserDTO userDTO = new UserDTO(user.getUserId(), user.getFirstName(), user.getLastName(), user.getScore(), user.getRole(), user.isBanned());
+
+        return new AnswerDTO(answer.getAnswerId(), answer.getQuestion(), answer.getContent(), userDTO, voteCount);
+    }
+
+    private void updateUserScore(User answerCreator, double scoreChange) {
+        answerCreator.setScore(answerCreator.getScore() + scoreChange);
+        userRepository.save(answerCreator);
     }
 }

@@ -35,16 +35,10 @@ public class UserController {
         return userService.deleteUserById(id);
     }
 
-    @PostMapping("/addUser")
-    @ResponseBody
-    public User addUser(@RequestBody User user) {
-        return userService.saveUser(user);
-    }
-
     @PutMapping("/updateUser")
     @ResponseBody
-    public User updateUser(@RequestBody User user){
-        return userService.updateUser(user);
+    public User updateUser(@RequestBody Long id) {
+        return userService.updateUser(id);
     }
 
 }

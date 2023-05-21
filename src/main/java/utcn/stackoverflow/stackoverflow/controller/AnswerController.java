@@ -8,7 +8,6 @@ import utcn.stackoverflow.stackoverflow.dto.AddAnswerRequest;
 import utcn.stackoverflow.stackoverflow.dto.AnswerDTO;
 import utcn.stackoverflow.stackoverflow.dto.UpdateAnswerRequest;
 import utcn.stackoverflow.stackoverflow.dto.VoteAnswerRequest;
-import utcn.stackoverflow.stackoverflow.entity.Answer;
 import utcn.stackoverflow.stackoverflow.service.AnswerService;
 
 import java.util.List;
@@ -22,13 +21,13 @@ public class AnswerController {
 
     @GetMapping("/getAll")
     @ResponseBody
-    public List<Answer> retrieveAnswers() {
+    public List<AnswerDTO> retrieveAnswers() {
         return answerService.retrieveAnswers();
     }
 
     @GetMapping("/getById/{id}")
     @ResponseBody
-    public Answer getAnswerById(@PathVariable Long id) {
+    public AnswerDTO getAnswerById(@PathVariable Long id) {
         return answerService.getAnswerById(id);
     }
 
@@ -53,13 +52,13 @@ public class AnswerController {
 
     @GetMapping("/getAllByQuestionId/{questionId}")
     @ResponseBody
-    public List<AnswerDTO> retrieveAnswersByQuestionId(@PathVariable Long questionId){
+    public List<AnswerDTO> retrieveAnswersByQuestionId(@PathVariable Long questionId) {
         return answerService.retrieveAnswersByQuestionId(questionId);
     }
 
     @PatchMapping("/voteAnswer")
     @ResponseBody
-    public Answer voteAnswer(@RequestBody VoteAnswerRequest voteRequest){
+    public AnswerDTO voteAnswer(@RequestBody VoteAnswerRequest voteRequest) {
         return answerService.voteAnswer(voteRequest.getUserId(), voteRequest.getAnswerId(), voteRequest.getValue());
     }
 }
