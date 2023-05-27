@@ -29,16 +29,20 @@ public class Question {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     Set<Tag> tags;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "question_id")
     private Long questionId;
+
     @Column(name = "title")
     private String title;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "content_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Content content;
+
     @OneToMany(mappedBy = "question")
     private List<Answer> answers = new ArrayList<>();
 
